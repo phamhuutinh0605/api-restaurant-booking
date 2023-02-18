@@ -1,6 +1,6 @@
 const express=require("express");
-const { getAllProduct, createProduct, getDetailProduct, updateProduct, deleteProduct, uploadAvatar } = require("../controllers/Product.controllers");
-const { uploadImages } = require("../middlewares/upload-images");
+const { getAllProduct, createProduct, getDetailProduct, updateProduct, deleteProduct } = require("../controllers/product.controllers");
+
 const productRouter=express.Router();
 
 productRouter.get("/",getAllProduct)
@@ -9,8 +9,7 @@ productRouter.post("/",createProduct)
 productRouter.put("/:id",updateProduct)
 productRouter.delete("/:id",deleteProduct)
 
-//upload img
-productRouter.post("/upload-avatar",uploadImages("product"),uploadAvatar);
+
 module.exports={
   productRouter
 }

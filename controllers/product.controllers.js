@@ -1,16 +1,16 @@
 const { Product } = require("../models/Product.js");
-const gravatarUrl = require("gravatar-url");
-
+const { Type } = require("../models/Type.js");
 const getAllProduct = async (req, res) => {
-  const getList = await Product.find();
+  const getList = await Product.find().populate("type");
   try {
     res.status(200).send(getList);
   } catch (error) {
     res.status(404).send(error);
   }
 };
+
 const getDetailProduct = async (req, res) => {
-  const getDetail = await Product.findById(req.params.id);
+  const getDetail = await Product.findById(req.params.id).populate("type");
   try {
     if (getDetail) {
       res.status(200).send(getDetail);
@@ -21,20 +21,21 @@ const getDetailProduct = async (req, res) => {
     res.status(500).send(error);
   }
 };
+
 const createProduct = async (req, res) => {
-  //upload img
-  const avatarDefault = gravatarUrl(req.body.name);
   const newProduct = new Product({
     ...req.body,
-    img:avatarDefault
   });
   try {
-    if (newProduct) {
-      //dat avatar mac dinh khi tao tk moi
-      await newProduct.save();
-      res.status(201).send(newProduct);
-    } else {
-      res.status(404).send("Not found");
+    if (req.body.type) {
+      const type = Type.findById({ _id: req.body.type });
+      await type.updateOne({ $push: { product: newProduct._id } });
+      if (newProduct) {
+        await newProduct.save();
+        res.status(201).send(newProduct);
+      } else {
+        res.status(404).send("Not found");
+      }
     }
   } catch (error) {
     res.status(500).send(error);
@@ -66,21 +67,11 @@ const deleteProduct = async (req, res) => {
   }
 };
 
-//upload img
-const uploadAvatar = async (req, res) => {
-  const { id } = req.params;
-  const { path } = req.file;
-  const userFound = await Product.findById(id)
-  userFound.img = `http://localhost:8069/${path}`;
-  await userFound.save();
-  res.send(userFound);
-};
-
 module.exports = {
   getAllProduct,
   getDetailProduct,
   createProduct,
   updateProduct,
   deleteProduct,
-  uploadAvatar,
+
 };
