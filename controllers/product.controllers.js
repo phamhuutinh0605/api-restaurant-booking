@@ -1,9 +1,16 @@
 const { Product } = require("../models/Product.js");
 const { Type } = require("../models/Type.js");
 const getAllProduct = async (req, res) => {
-  const getList = await Product.find().populate("type");
+  const price=req.query.name;
   try {
-    res.status(200).send(getList);
+    if(price){
+      const getList = await Product.find({ price: { $gte:price[0], $lte:price[1]}});
+      console.log(getList)
+      res.status(200).send(getList);
+    }else{
+      const getList = await Product.find().populate("type");
+      res.status(200).send(getList);
+    }
   } catch (error) {
     res.status(404).send(error);
   }
@@ -73,5 +80,4 @@ module.exports = {
   createProduct,
   updateProduct,
   deleteProduct,
-
 };
